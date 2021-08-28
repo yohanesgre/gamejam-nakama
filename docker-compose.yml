@@ -3,7 +3,7 @@ services:
   cockroachdb:
     image: cockroachdb/cockroach:v21.1.7
     command: start-single-node --insecure --store=attrs=ssd,path=/var/lib/cockroach/
-    restart: "no"
+    restart: "always"
     volumes:
       - data:/var/lib/cockroach
     expose:
@@ -14,16 +14,14 @@ services:
       - "8080:8080"
   nakama:
     build: .
-    container_name: backend
-    depends_on:
-      - postgres
+    container_name: gamejam-nakama
     entrypoint:
       - "/bin/sh"
       - "-ecx"
       - >
         /nakama/nakama migrate up --database.address root@cockroachdb:26257 &&
         exec /nakama/nakama --name nakama1 --database.address root@cockroachdb:26257 --logger.level DEBUG --session.token_expiry_sec 7200 --metrics.prometheus_port 9100
-    restart: "no"
+    restart: "always"
     links:
       - "cockroachdb:db"
     depends_on:
